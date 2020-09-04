@@ -86,4 +86,27 @@ public class TestSuite
         yield return new WaitForSeconds(0.1f);
         Assert.AreEqual(game.score, 1);
     }
+
+    //7. Движение астероида в сторону
+    [UnityTest]
+    public IEnumerator AsteroidsMoveSide()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        float initialXPos = asteroid.transform.position.x;
+        yield return new WaitForSeconds(0.1f);
+        //Assert.Less(asteroid.transform.position.x, initialXPos);
+        Assert.LessOrEqual(asteroid.transform.position.x, initialXPos);
+    }
+
+    //8. Столкновение с астероидом не происходит и игра не завершается
+    [UnityTest]
+    public IEnumerator CollisionWithAnAsteroidDoesNotOccur()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        float initialAsteroidXPos = asteroid.transform.position.x;
+        float initialShipXPos = game.GetShip().transform.position.x;
+        yield return new WaitForSeconds(0.1f);
+        Assert.False(game.isGameOver);
+    }
+
 }
