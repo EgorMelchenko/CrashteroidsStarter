@@ -6,6 +6,10 @@ using System.Collections;
 public class TestSuite
 {
     private Game game;
+    private Ship ship;
+    private Asteroid asteroid;
+    private Laser laser;
+    private Spawner spawner;
 
     //Старт игры - метод вызывается до выполнения каждого теста.
     [SetUp]
@@ -109,4 +113,113 @@ public class TestSuite
         Assert.False(game.isGameOver);
     }
 
+    //9. При промахе лазер неуничтожает астероид
+    [UnityTest]
+    public IEnumerator LaserDoesNotDestroysAnAsteroid()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = Vector3.left;
+        GameObject laser = game.GetShip().SpawnLaser();
+        laser.transform.position = Vector3.right;
+        yield return new WaitForSeconds(0.1f);
+        UnityEngine.Assertions.Assert.IsNotNull(asteroid);
+    }
+
+    //10. Когда игрок не уничтожает астероид, счёт не увеличивается
+    [UnityTest]
+    public IEnumerator NotDestroyedAsteroidDoesNotRaisesScore()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = Vector3.left;
+        GameObject laser = game.GetShip().SpawnLaser();
+        laser.transform.position = Vector3.right;
+        yield return new WaitForSeconds(0.1f);
+        Assert.AreEqual(game.score, 0);
+    }
+
+    //11. Когда игрок уничтожает астероид, счёт не увеличивается на 2
+    [UnityTest]
+    public IEnumerator DestroyedAsteroidDoesNotDoubleTheScore()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = Vector3.zero;
+        GameObject laser = game.GetShip().SpawnLaser();
+        laser.transform.position = Vector3.zero;
+        yield return new WaitForSeconds(0.1f);
+        Assert.AreNotEqual(game.score, 2);
+    }
+
+    //12. Когда игрок уничтожает астероид, счёт не уменьшается
+    [UnityTest]
+    public IEnumerator DestroyedAsteroidDoesNotDropScore()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = Vector3.zero;
+        GameObject laser = game.GetShip().SpawnLaser();
+        laser.transform.position = Vector3.zero;
+        yield return new WaitForSeconds(0.1f);
+        Assert.AreNotEqual(game.score, -1);
+    }
+
+    //13. Когда игрок врезается в астероид, счёт не уменьшается
+    [UnityTest]
+    public IEnumerator WhenAPlayerCrashesIntoAnAsteroidTheScoreDoesNotDecrease()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = game.GetShip().transform.position;
+        yield return new WaitForSeconds(0.1f);
+        Assert.True(game.isGameOver);
+        Assert.AreNotEqual(game.score, - 1);
+    }
+
+    //14. Когда игрок врезается в астероид, счёт не увеличивается
+    [UnityTest]
+    public IEnumerator WhenAPlayerCrashesIntoAnAsteroidTheScoreDoesNotIncrease()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = game.GetShip().transform.position;
+        yield return new WaitForSeconds(0.1f);
+        Assert.True(game.isGameOver);
+        Assert.AreNotEqual(game.score, 1);
+    }
+
+    //15. Когда игрок врезается в астероид, счёт не изменяется
+    [UnityTest]
+    public IEnumerator WhenAPlayerCrashesIntoAnAsteroidTheScoreDoesNotChange()
+    {
+        GameObject asteroid = game.GetSpawner().SpawnAsteroid();
+        asteroid.transform.position = game.GetShip().transform.position;
+        yield return new WaitForSeconds(0.1f);
+        Assert.True(game.isGameOver);
+        Assert.AreEqual(game.score, 0);
+    }
+
+    //16. Корабль движется вверх
+    [UnityTest]
+    public IEnumerator ShipMoveUp()
+    {
+        Ship ship = game.GetShip();
+        ship.transform.position = Vector3.left;
+        float initialYPos = ship.transform.position.y;
+        yield return new WaitForSeconds(0.1f);
+        Assert.Greater(ship.transform.position.y, initialYPos);
+    }
+
+    //17. Корабль может стрелять
+    [UnityTest]
+    public IEnumerator ShipCanShoot()
+    {
+        Ship ship = game.GetShip();
+        yield return new WaitForSeconds(0.1f);
+        Assert.True(ship.canShoot);
+    }
+
+    //18. Корабль не мертв
+    [UnityTest]
+    public IEnumerator ShipIsNotDead()
+    {
+        Ship ship = game.GetShip();
+        yield return new WaitForSeconds(0.1f);
+        Assert.False(ship.isDead);
+    }
 }
